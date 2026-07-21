@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import type { ProjectData } from "@/types/project";
 
-export default function Sidebar() {
+type SidebarProps = {
+  onGenerate: (data: ProjectData) => void;
+};
+
+export default function Sidebar({ onGenerate }: SidebarProps) {
   const [theme, setTheme] = useState("");
   const [scale, setScale] = useState("Medium");
   const [prompt, setPrompt] = useState("");
 
   function handleGenerate() {
-    console.log({
+    onGenerate({
       theme,
       scale,
       prompt,
