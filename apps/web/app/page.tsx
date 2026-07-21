@@ -1,17 +1,29 @@
 import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import Workspace from "@/components/Workspace";
+import PlanPanel from "@/components/PlanPanel";
 
 export default function HomePage() {
   return (
-    <>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <Header />
 
       <main
         style={{
-          padding: 24,
+          flex: 1,
+          display: "flex",
         }}
       >
-        Welcome to Minecraft AI Studio
+        <Sidebar />
+        <Workspace />
+        <PlanPanel />
       </main>
-    </>
+    </div>
   );
 }
