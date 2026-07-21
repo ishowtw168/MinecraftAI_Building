@@ -1,4 +1,20 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Sidebar() {
+  const [theme, setTheme] = useState("");
+  const [scale, setScale] = useState("Medium");
+  const [prompt, setPrompt] = useState("");
+
+  function handleGenerate() {
+    console.log({
+      theme,
+      scale,
+      prompt,
+    });
+  }
+
   return (
     <aside
       style={{
@@ -9,17 +25,14 @@ export default function Sidebar() {
     >
       <h3>Project Settings</h3>
 
-      <label
-        style={{
-          display: "block",
-          marginTop: 24,
-        }}
-      >
+      <label style={{ display: "block", marginTop: 24 }}>
         Theme
       </label>
 
       <input
         type="text"
+        value={theme}
+        onChange={(event) => setTheme(event.target.value)}
         placeholder="例如：埃及神殿"
         style={{
           width: "100%",
@@ -28,16 +41,13 @@ export default function Sidebar() {
         }}
       />
 
-      <label
-        style={{
-          display: "block",
-          marginTop: 20,
-        }}
-      >
+      <label style={{ display: "block", marginTop: 20 }}>
         Scale
       </label>
 
       <select
+        value={scale}
+        onChange={(event) => setScale(event.target.value)}
         style={{
           width: "100%",
           marginTop: 8,
@@ -49,16 +59,13 @@ export default function Sidebar() {
         <option>Large</option>
       </select>
 
-      <label
-        style={{
-          display: "block",
-          marginTop: 20,
-        }}
-      >
+      <label style={{ display: "block", marginTop: 20 }}>
         Prompt
       </label>
 
       <textarea
+        value={prompt}
+        onChange={(event) => setPrompt(event.target.value)}
         placeholder="描述你想建造的世界……"
         rows={6}
         style={{
@@ -70,6 +77,8 @@ export default function Sidebar() {
       />
 
       <button
+        type="button"
+        onClick={handleGenerate}
         style={{
           marginTop: 24,
           width: "100%",
