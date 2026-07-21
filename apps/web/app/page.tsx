@@ -10,9 +10,21 @@ import type { ProjectData } from "@/types/project";
 export default function HomePage() {
   const [project, setProject] = useState<ProjectData | null>(null);
 
-  function handleGenerate(data: ProjectData) {
-    setProject(data);
-  }
+  async function handleGenerate(data: ProjectData) {
+  const response = await fetch("/api/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+
+  console.log(result);
+
+  setProject(result.received);
+}
 
   return (
     <div
