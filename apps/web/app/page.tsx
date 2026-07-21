@@ -32,7 +32,7 @@ export default function HomePage() {
       >
         <Sidebar onGenerate={handleGenerate} />
         <Workspace />
-        <PlanPanel />
+        <PlanPanel project={project} />
       </main>
     </div>
   );
