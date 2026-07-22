@@ -6,11 +6,12 @@ import Sidebar from "@/components/Sidebar";
 import Workspace from "@/components/Workspace";
 import PlanPanel from "@/components/PlanPanel";
 import type { ProjectData } from "@/types/project";
-
 import { templates } from "@/data/templates";
 
 export default function HomePage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<ProjectData | undefined>();
   const [project, setProject] = useState<ProjectData | null>(null);
 
   async function handleGenerate(data: ProjectData) {
@@ -25,6 +26,18 @@ export default function HomePage() {
     const result = await response.json();
 
     setProject(result.received);
+  }
+
+  function openEmptyEditor() {
+    setSelectedTemplate(undefined);
+    setProject(null);
+    setIsEditorOpen(true);
+  }
+
+  function openTemplateEditor(templateData: ProjectData) {
+    setSelectedTemplate(templateData);
+    setProject(null);
+    setIsEditorOpen(true);
   }
 
   if (isEditorOpen) {
@@ -46,8 +59,13 @@ export default function HomePage() {
             minHeight: 0,
           }}
         >
-          <Sidebar onGenerate={handleGenerate} />
+          <Sidebar
+            onGenerate={handleGenerate}
+            initialProject={selectedTemplate}
+          />
+
           <Workspace />
+
           <PlanPanel project={project} />
         </main>
       </div>
@@ -88,7 +106,7 @@ export default function HomePage() {
 
         <button
           type="button"
-          onClick={() => setIsEditorOpen(true)}
+          onClick={openEmptyEditor}
           style={{
             padding: "11px 18px",
             border: "1px solid #5e8d68",
@@ -154,7 +172,7 @@ export default function HomePage() {
 
         <button
           type="button"
-          onClick={() => setIsEditorOpen(true)}
+          onClick={openEmptyEditor}
           style={{
             marginTop: 38,
             padding: "16px 30px",
@@ -213,7 +231,7 @@ export default function HomePage() {
             <button
               key={template.name}
               type="button"
-              onClick={() => setIsEditorOpen(true)}
+              onClick={() => openTemplateEditor(template.data)}
               style={{
                 minHeight: 170,
                 padding: 24,
@@ -286,7 +304,9 @@ export default function HomePage() {
           ].map((feature) => (
             <div key={feature.title}>
               <div style={{ fontSize: 32 }}>{feature.icon}</div>
+
               <h3 style={{ marginBottom: 8 }}>{feature.title}</h3>
+
               <p
                 style={{
                   margin: 0,
