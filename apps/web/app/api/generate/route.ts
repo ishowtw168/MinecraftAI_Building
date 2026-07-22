@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { runArchitect } from "@/lib/agents/architect";
 import type { ProjectData } from "@/types/project";
 import type { BuildingPlan } from "@/types/plan";
 
@@ -57,21 +58,34 @@ export async function POST(request: Request) {
       );
     }
 
-    const scale = body.scale in sizeByScale
-      ? body.scale
-      : "Medium";
-
+    const scale = body.scale in sizeByScale ? body.scale : "Medium";
     const amounts = amountByScale[scale];
+
+    const model = process.env.GEMINI_MODEL;
+
+    if (!model) {
+      throw new Error("缺少 GEMINI_MODEL 環境變數。");
+    }
+
+    const architectResult = await runArchitect(
+      {
+        theme: body.theme,
+        scale,
+        prompt: body.prompt,
+      },
+      model
+    );
 
     const plan: BuildingPlan = {
       name: `${body.theme}建築計畫`,
 
-      story: `這座建築以「${body.theme}」為核心主題。整體設計會根據你的構想「${body.prompt}」進行規劃，讓建築兼具清楚的視覺特色、探索動線與 Minecraft 世界中的實用性。`,
+      // 這裡已經改成真正的 Architect AI 回答
+      story: architectResult,
 
       size: sizeByScale[scale],
 
       palette:
-        "主材料可依照主題選擇石材、木材或特殊方塊，並使用深淺不同的材料增加建築層次。",
+        "目前材料配色暫時沿用基礎規劃，之後會交由 Architect 與 Builder Agent 產生結構化結果。",
 
       materials: [
         {
@@ -92,7 +106,7 @@ export async function POST(request: Request) {
         },
         {
           name: "玻璃、欄杆與細節材料",
-          amount: "依實際設計調整",
+          amount: "依 AI 設計調整",
         },
       ],
 
@@ -105,51 +119,55 @@ export async function POST(request: Request) {
         {
           title: "建立地基與外框",
           description:
-            "先用主要結構方塊完成地基，再標示入口、主要房間與外牆位置。",
+            "先完成主要地基，再根據 Architect 的設計標示入口、房間及外牆位置。",
         },
         {
           title: "搭建立面與主要結構",
           description:
-            "依照主題建立牆面、柱子、塔樓或屋頂，先完成大型輪廓，再處理細節。",
+            "依照 Architect 產生的建築風格完成牆面、屋頂、塔樓及主要輪廓。",
         },
         {
           title: "規劃內部空間",
           description:
-            "加入大廳、走廊、樓梯與主題房間，確保玩家可以順暢移動與探索。",
+            "加入大廳、走廊、樓梯與功能房間，確保玩家可以順暢移動。",
         },
         {
           title: "加入主題裝飾",
-          description: `根據「${body.prompt}」加入代表性的裝飾、場景與特殊設施。`,
+          description: `根據「${body.prompt}」及 Architect 的設計加入主題細節。`,
         },
         {
           title: "完成照明與環境",
           description:
-            "放置隱藏光源或主題燈具，並補上道路、植栽、水景及周邊地形。",
+            "放置光源並補充道路、植栽、水景及周邊地形。",
         },
         {
           title: "最後檢查",
           description:
-            "從不同方向觀察建築比例，修正過於平坦的牆面並確認內部沒有怪物生成區域。",
+            "檢查建築比例、玩家動線、照明及可能生成怪物的區域。",
         },
       ],
     };
 
     return NextResponse.json({
       success: true,
-
-      // 暫時保留，避免目前的 page.tsx 失去原本資料
       received: body,
-
-      // 新的建築規劃資料
+      agents: {
+        architect: architectResult,
+      },
       plan,
     });
   } catch (error) {
     console.error("Generate plan error:", error);
 
+    const message =
+      error instanceof Error
+        ? error.message
+        : "產生建築規劃時發生未知錯誤。";
+
     return NextResponse.json(
       {
         success: false,
-        message: "產生建築規劃時發生錯誤，請稍後再試。",
+        message,
       },
       {
         status: 500,
