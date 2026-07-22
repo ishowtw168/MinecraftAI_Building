@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import Workspace from "@/components/Workspace";
 import PlanPanel from "@/components/PlanPanel";
 import type { ProjectData } from "@/types/project";
+import type { BuildingPlan } from "@/types/plan";
 import { templates } from "@/data/templates";
 
 export default function HomePage() {
@@ -14,20 +15,45 @@ export default function HomePage() {
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectData | undefined>();
 
-  const [project, setProject] = useState<ProjectData | null>(null);
+  const [project, setProject] =
+    useState<BuildingPlan | null>(null);
+
+  const [isGenerating, setIsGenerating] = useState(false);
 
   async function handleGenerate(data: ProjectData) {
-    const response = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      setIsGenerating(true);
+      setProject(null);
 
-    const result = await response.json();
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-    setProject(result.received);
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.message || "產生建築規劃時發生錯誤。"
+        );
+      }
+
+      setProject(result.plan);
+    } catch (error) {
+      console.error("Generate plan error:", error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "產生建築規劃時發生錯誤。";
+
+      alert(message);
+    } finally {
+      setIsGenerating(false);
+    }
   }
 
   function openEmptyEditor() {
@@ -36,7 +62,9 @@ export default function HomePage() {
     setIsEditorOpen(true);
   }
 
-  function openTemplateEditor(templateData: ProjectData) {
+  function openTemplateEditor(
+    templateData: ProjectData
+  ) {
     setSelectedTemplate(templateData);
     setProject(null);
     setIsEditorOpen(true);
@@ -56,9 +84,12 @@ export default function HomePage() {
       <div
         style={{
           minHeight: "100vh",
+          height: "100vh",
           display: "flex",
           flexDirection: "column",
           background: "#0d0f0e",
+          color: "white",
+          overflow: "hidden",
         }}
       >
         <Header />
@@ -68,6 +99,7 @@ export default function HomePage() {
             flex: 1,
             display: "flex",
             minHeight: 0,
+            position: "relative",
           }}
         >
           <Sidebar
@@ -77,7 +109,10 @@ export default function HomePage() {
 
           <Workspace />
 
-          <PlanPanel project={project} />
+          <PlanPanel
+            project={project}
+            isGenerating={isGenerating}
+          />
         </main>
       </div>
     );
@@ -148,7 +183,8 @@ export default function HomePage() {
             padding: "8px 14px",
             borderRadius: 999,
             background: "rgba(89, 148, 101, 0.16)",
-            border: "1px solid rgba(116, 177, 127, 0.35)",
+            border:
+              "1px solid rgba(116, 177, 127, 0.35)",
             color: "#a9d8b1",
             fontSize: 14,
           }}
@@ -195,7 +231,8 @@ export default function HomePage() {
             fontSize: 18,
             fontWeight: 800,
             cursor: "pointer",
-            boxShadow: "0 12px 35px rgba(71, 139, 84, 0.3)",
+            boxShadow:
+              "0 12px 35px rgba(71, 139, 84, 0.3)",
           }}
         >
           開始建造 ↓
@@ -271,7 +308,8 @@ export default function HomePage() {
                 textAlign: "left",
                 border: "1px solid #303a33",
                 borderRadius: 18,
-                background: "rgba(18, 23, 20, 0.85)",
+                background:
+                  "rgba(18, 23, 20, 0.85)",
                 color: "white",
                 cursor: "pointer",
               }}
