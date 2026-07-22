@@ -10,8 +10,10 @@ import { templates } from "@/data/templates";
 
 export default function HomePage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
   const [selectedTemplate, setSelectedTemplate] =
     useState<ProjectData | undefined>();
+
   const [project, setProject] = useState<ProjectData | null>(null);
 
   async function handleGenerate(data: ProjectData) {
@@ -38,6 +40,15 @@ export default function HomePage() {
     setSelectedTemplate(templateData);
     setProject(null);
     setIsEditorOpen(true);
+  }
+
+  function scrollToTemplates() {
+    document
+      .getElementById("building-ideas")
+      ?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
   }
 
   if (isEditorOpen) {
@@ -89,6 +100,7 @@ export default function HomePage() {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
+          gap: 20,
         }}
       >
         <div
@@ -172,7 +184,7 @@ export default function HomePage() {
 
         <button
           type="button"
-          onClick={openEmptyEditor}
+          onClick={scrollToTemplates}
           style={{
             marginTop: 38,
             padding: "16px 30px",
@@ -186,18 +198,25 @@ export default function HomePage() {
             boxShadow: "0 12px 35px rgba(71, 139, 84, 0.3)",
           }}
         >
-          開始建造 →
+          開始建造 ↓
         </button>
       </section>
 
       <section
+        id="building-ideas"
         style={{
           maxWidth: 1180,
           margin: "0 auto",
           padding: "30px 28px 100px",
+          scrollMarginTop: 30,
         }}
       >
-        <div style={{ textAlign: "center", marginBottom: 34 }}>
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 34,
+          }}
+        >
           <p
             style={{
               margin: 0,
@@ -218,12 +237,24 @@ export default function HomePage() {
           >
             從熱門建築靈感開始
           </h2>
+
+          <p
+            style={{
+              maxWidth: 620,
+              margin: "14px auto 0",
+              color: "#9da7a0",
+              lineHeight: 1.7,
+            }}
+          >
+            選擇一個模板快速開始，進入編輯器後仍然可以修改所有內容。
+          </p>
         </div>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(240px, 1fr))",
             gap: 18,
           }}
         >
@@ -231,7 +262,9 @@ export default function HomePage() {
             <button
               key={template.name}
               type="button"
-              onClick={() => openTemplateEditor(template.data)}
+              onClick={() =>
+                openTemplateEditor(template.data)
+              }
               style={{
                 minHeight: 170,
                 padding: 24,
@@ -243,7 +276,9 @@ export default function HomePage() {
                 cursor: "pointer",
               }}
             >
-              <div style={{ fontSize: 36 }}>{template.icon}</div>
+              <div style={{ fontSize: 36 }}>
+                {template.icon}
+              </div>
 
               <h3
                 style={{
@@ -266,6 +301,30 @@ export default function HomePage() {
             </button>
           ))}
         </div>
+
+        <div
+          style={{
+            marginTop: 34,
+            textAlign: "center",
+          }}
+        >
+          <button
+            type="button"
+            onClick={openEmptyEditor}
+            style={{
+              padding: "13px 24px",
+              border: "1px solid #536b59",
+              borderRadius: 10,
+              background: "transparent",
+              color: "#d5ddd7",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            不使用模板，從空白開始
+          </button>
+        </div>
       </section>
 
       <section
@@ -281,7 +340,8 @@ export default function HomePage() {
             margin: "0 auto",
             padding: "70px 28px",
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
             gap: 24,
           }}
         >
@@ -303,9 +363,13 @@ export default function HomePage() {
             },
           ].map((feature) => (
             <div key={feature.title}>
-              <div style={{ fontSize: 32 }}>{feature.icon}</div>
+              <div style={{ fontSize: 32 }}>
+                {feature.icon}
+              </div>
 
-              <h3 style={{ marginBottom: 8 }}>{feature.title}</h3>
+              <h3 style={{ marginBottom: 8 }}>
+                {feature.title}
+              </h3>
 
               <p
                 style={{
