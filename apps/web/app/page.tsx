@@ -7,38 +7,7 @@ import Workspace from "@/components/Workspace";
 import PlanPanel from "@/components/PlanPanel";
 import type { ProjectData } from "@/types/project";
 
-const templates = [
-  {
-    icon: "🏰",
-    name: "中世紀城堡",
-    description: "城牆、塔樓、吊橋與地下牢房",
-  },
-  {
-    icon: "🏺",
-    name: "埃及神殿",
-    description: "石柱、法老雕像、密室與墓穴",
-  },
-  {
-    icon: "🧝",
-    name: "精靈村莊",
-    description: "樹屋、吊橋、藤蔓與發光植物",
-  },
-  {
-    icon: "⛩️",
-    name: "日式神社",
-    description: "鳥居、櫻花、石燈籠與池塘",
-  },
-  {
-    icon: "🏴‍☠️",
-    name: "海盜港口",
-    description: "碼頭、酒館、海盜船與寶藏洞穴",
-  },
-  {
-    icon: "🏙️",
-    name: "現代別墅",
-    description: "玻璃牆、泳池、花園與地下車庫",
-  },
-];
+import { templates } from "@/data/templates";
 
 export default function HomePage() {
   const [isEditorOpen, setIsEditorOpen] = useState(false);
