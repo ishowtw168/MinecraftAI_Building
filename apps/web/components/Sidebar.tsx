@@ -1,80 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { templates, type BuildingTemplate } from "@/data/templates";
 import type { ProjectData } from "@/types/project";
 
 type SidebarProps = {
   onGenerate: (data: ProjectData) => void;
+  initialProject?: ProjectData;
 };
 
-type BuildingTemplate = {
-  name: string;
-  icon: string;
-  theme: string;
-  scale: string;
-  prompt: string;
-};
+export default function Sidebar({
+  onGenerate,
+  initialProject,
+}: SidebarProps) {
+  const [theme, setTheme] = useState(initialProject?.theme ?? "");
+  const [scale, setScale] = useState(initialProject?.scale ?? "Medium");
+  const [prompt, setPrompt] = useState(initialProject?.prompt ?? "");
 
-const templates: BuildingTemplate[] = [
-  {
-    name: "中世紀城堡",
-    icon: "🏰",
-    theme: "中世紀城堡",
-    scale: "Large",
-    prompt:
-      "建造一座位於山丘上的大型中世紀城堡，包含城牆、瞭望塔、吊橋、中央主堡和地下牢房。",
-  },
-  {
-    name: "日式神社",
-    icon: "⛩️",
-    theme: "日式神社",
-    scale: "Medium",
-    prompt:
-      "建造一座位於櫻花森林中的日式神社，包含鳥居、石燈籠、參道、主殿和小型池塘。",
-  },
-  {
-    name: "精靈村莊",
-    icon: "🧝",
-    theme: "精靈村莊",
-    scale: "Medium",
-    prompt:
-      "建造一座藏在巨大森林中的精靈村莊，房屋依附在樹木上，並使用吊橋、藤蔓和發光植物連接。",
-  },
-  {
-    name: "埃及神殿",
-    icon: "🏺",
-    theme: "埃及神殿",
-    scale: "Large",
-    prompt:
-      "建造一座被沙漠包圍的古埃及神殿，包含巨大石柱、法老雕像、密室、祭壇和地下墓穴。",
-  },
-  {
-    name: "現代別墅",
-    icon: "🏙️",
-    theme: "現代別墅",
-    scale: "Medium",
-    prompt:
-      "建造一座懸崖旁的現代豪華別墅，包含大片玻璃窗、無邊際泳池、花園和地下車庫。",
-  },
-  {
-    name: "海盜港口",
-    icon: "🏴‍☠️",
-    theme: "海盜港口",
-    scale: "Large",
-    prompt:
-      "建造一座熱鬧的海盜港口，包含木造碼頭、酒館、倉庫、燈塔、海盜船和隱藏寶藏洞穴。",
-  },
-];
+  useEffect(() => {
+    if (!initialProject) {
+      return;
+    }
 
-export default function Sidebar({ onGenerate }: SidebarProps) {
-  const [theme, setTheme] = useState("");
-  const [scale, setScale] = useState("Medium");
-  const [prompt, setPrompt] = useState("");
+    setTheme(initialProject.theme);
+    setScale(initialProject.scale);
+    setPrompt(initialProject.prompt);
+  }, [initialProject]);
 
   function selectTemplate(template: BuildingTemplate) {
-    setTheme(template.theme);
-    setScale(template.scale);
-    setPrompt(template.prompt);
+    setTheme(template.data.theme);
+    setScale(template.data.scale);
+    setPrompt(template.data.prompt);
   }
 
   function handleGenerate() {
@@ -123,7 +79,8 @@ export default function Sidebar({ onGenerate }: SidebarProps) {
               padding: 10,
               border: "1px solid #444",
               borderRadius: 8,
-              background: theme === template.theme ? "#2f6fed" : "transparent",
+              background:
+                theme === template.data.theme ? "#2f6fed" : "transparent",
               color: "inherit",
               cursor: "pointer",
               textAlign: "left",
@@ -135,9 +92,7 @@ export default function Sidebar({ onGenerate }: SidebarProps) {
         ))}
       </div>
 
-      <label style={{ display: "block", marginTop: 24 }}>
-        Theme
-      </label>
+      <label style={{ display: "block", marginTop: 24 }}>Theme</label>
 
       <input
         type="text"
@@ -152,9 +107,7 @@ export default function Sidebar({ onGenerate }: SidebarProps) {
         }}
       />
 
-      <label style={{ display: "block", marginTop: 20 }}>
-        Scale
-      </label>
+      <label style={{ display: "block", marginTop: 20 }}>Scale</label>
 
       <select
         value={scale}
@@ -165,14 +118,12 @@ export default function Sidebar({ onGenerate }: SidebarProps) {
           padding: 10,
         }}
       >
-        <option>Small</option>
-        <option>Medium</option>
-        <option>Large</option>
+        <option value="Small">Small</option>
+        <option value="Medium">Medium</option>
+        <option value="Large">Large</option>
       </select>
 
-      <label style={{ display: "block", marginTop: 20 }}>
-        Prompt
-      </label>
+      <label style={{ display: "block", marginTop: 20 }}>Prompt</label>
 
       <textarea
         value={prompt}
