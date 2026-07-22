@@ -2,156 +2,390 @@ import type { BuildingPlan } from "@/types/plan";
 
 type PlanPanelProps = {
   project: BuildingPlan | null;
+  isGenerating?: boolean;
+};
+
+const sectionStyle = {
+  padding: 18,
+  border: "1px solid #303832",
+  borderRadius: 14,
+  background: "#171b18",
 };
 
 export default function PlanPanel({
   project,
+  isGenerating = false,
 }: PlanPanelProps) {
   return (
     <aside
       style={{
-        width: 360,
-        padding: 24,
-        borderLeft: "1px solid #333",
+        width: 380,
+        minWidth: 320,
+        height: "100%",
+        padding: 22,
+        borderLeft: "1px solid #303832",
         overflowY: "auto",
-        background: "#101312",
+        background: "#101311",
         color: "white",
+        boxSizing: "border-box",
       }}
     >
-      <h2
+      <div
         style={{
-          margin: 0,
-          marginBottom: 20,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          paddingBottom: 18,
+          borderBottom: "1px solid #303832",
         }}
       >
-        🏗️ 建築規劃
-      </h2>
-
-      {!project ? (
-        <p
+        <div
           style={{
-            color: "#9aa39d",
-            lineHeight: 1.8,
+            width: 42,
+            height: 42,
+            display: "grid",
+            placeItems: "center",
+            borderRadius: 12,
+            background: "#26382b",
+            fontSize: 22,
           }}
         >
-          尚未產生建築計畫。
-          <br />
-          填寫左側資料後按下
-          <strong> Generate Plan </strong>
-          即可查看 AI 建議。
-        </p>
-      ) : (
-        <>
+          🏗️
+        </div>
+
+        <div>
           <h2
             style={{
-              marginTop: 0,
+              margin: 0,
+              fontSize: 20,
             }}
           >
-            {project.name}
+            建築規劃
           </h2>
 
-          <section
+          <p
             style={{
-              marginTop: 24,
+              margin: "4px 0 0",
+              color: "#8e9991",
+              fontSize: 13,
             }}
           >
-            <h3>📖 建築故事</h3>
+            Minecraft AI Building Plan
+          </p>
+        </div>
+      </div>
+
+      {isGenerating ? (
+        <div
+          style={{
+            marginTop: 24,
+            padding: 24,
+            border: "1px solid #344239",
+            borderRadius: 14,
+            background: "#171d19",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 36,
+              marginBottom: 14,
+            }}
+          >
+            ⛏️
+          </div>
+
+          <h3
+            style={{
+              margin: 0,
+            }}
+          >
+            正在產生建築計畫
+          </h3>
+
+          <p
+            style={{
+              margin: "10px 0 0",
+              color: "#9aa49d",
+              lineHeight: 1.7,
+            }}
+          >
+            系統正在整理建築尺寸、材料與施工步驟……
+          </p>
+        </div>
+      ) : !project ? (
+        <div
+          style={{
+            marginTop: 24,
+            padding: 24,
+            border: "1px dashed #3b463f",
+            borderRadius: 14,
+            background: "#151916",
+            textAlign: "center",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 38,
+              marginBottom: 14,
+            }}
+          >
+            🧱
+          </div>
+
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 18,
+            }}
+          >
+            尚未產生建築計畫
+          </h3>
+
+          <p
+            style={{
+              margin: "12px 0 0",
+              color: "#9aa39d",
+              lineHeight: 1.8,
+              fontSize: 14,
+            }}
+          >
+            在左側選擇建築主題、規模並輸入構想，
+            接著按下 Generate Plan。
+          </p>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gap: 18,
+            marginTop: 22,
+          }}
+        >
+          <section
+            style={{
+              ...sectionStyle,
+              background:
+                "linear-gradient(145deg, #213328, #171c18)",
+            }}
+          >
+            <p
+              style={{
+                margin: 0,
+                color: "#81bb8d",
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: 1.5,
+              }}
+            >
+              BUILDING PLAN
+            </p>
+
+            <h2
+              style={{
+                margin: "10px 0 0",
+                fontSize: 24,
+                lineHeight: 1.35,
+              }}
+            >
+              {project.name}
+            </h2>
+          </section>
+
+          <section style={sectionStyle}>
+            <h3
+              style={{
+                margin: "0 0 12px",
+                fontSize: 16,
+              }}
+            >
+              📖 建築故事
+            </h3>
 
             <p
               style={{
+                margin: 0,
                 lineHeight: 1.8,
-                color: "#cfcfcf",
+                color: "#c3cbc5",
+                fontSize: 14,
+                whiteSpace: "pre-wrap",
+                overflowWrap: "anywhere",
               }}
             >
               {project.story}
             </p>
           </section>
 
-          <section
-            style={{
-              marginTop: 24,
-            }}
-          >
-            <h3>📏 建築尺寸</h3>
+          <section style={sectionStyle}>
+            <h3
+              style={{
+                margin: "0 0 12px",
+                fontSize: 16,
+              }}
+            >
+              📏 建築尺寸
+            </h3>
 
-            <p>{project.size}</p>
+            <div
+              style={{
+                padding: "12px 14px",
+                borderRadius: 10,
+                background: "#0f1210",
+                color: "#b9d9c0",
+                fontWeight: 700,
+                lineHeight: 1.6,
+              }}
+            >
+              {project.size}
+            </div>
           </section>
 
-          <section
-            style={{
-              marginTop: 24,
-            }}
-          >
-            <h3>🎨 建材建議</h3>
+          <section style={sectionStyle}>
+            <h3
+              style={{
+                margin: "0 0 12px",
+                fontSize: 16,
+              }}
+            >
+              🎨 建材風格
+            </h3>
 
             <p
               style={{
-                lineHeight: 1.7,
-                color: "#cfcfcf",
+                margin: 0,
+                lineHeight: 1.8,
+                color: "#c3cbc5",
+                fontSize: 14,
               }}
             >
               {project.palette}
             </p>
           </section>
 
-          <section
-            style={{
-              marginTop: 28,
-            }}
-          >
-            <h3>📦 材料清單</h3>
-
-            <ul
+          <section style={sectionStyle}>
+            <h3
               style={{
-                paddingLeft: 20,
-                lineHeight: 2,
+                margin: "0 0 14px",
+                fontSize: 16,
               }}
             >
-              {project.materials.map((material) => (
-                <li key={material.name}>
-                  <strong>{material.name}</strong>
-                  {" - "}
-                  {material.amount}
-                </li>
-              ))}
-            </ul>
-          </section>
+              📦 材料清單
+            </h3>
 
-          <section
-            style={{
-              marginTop: 28,
-            }}
-          >
-            <h3>🛠️ 建造步驟</h3>
-
-            <ol
+            <div
               style={{
-                paddingLeft: 22,
+                display: "grid",
+                gap: 10,
               }}
             >
-              {project.steps.map((step) => (
-                <li
-                  key={step.title}
-                  style={{
-                    marginBottom: 18,
-                  }}
-                >
-                  <strong>{step.title}</strong>
-
-                  <p
+              {project.materials.map(
+                (material, index) => (
+                  <div
+                    key={`${material.name}-${index}`}
                     style={{
-                      marginTop: 6,
-                      lineHeight: 1.7,
-                      color: "#cfcfcf",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 14,
+                      padding: "11px 12px",
+                      borderRadius: 10,
+                      background: "#0f1210",
                     }}
                   >
-                    {step.description}
-                  </p>
-                </li>
-              ))}
-            </ol>
+                    <span
+                      style={{
+                        color: "#d5ddd7",
+                        fontSize: 14,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {material.name}
+                    </span>
+
+                    <strong
+                      style={{
+                        flexShrink: 0,
+                        color: "#86bf91",
+                        fontSize: 13,
+                      }}
+                    >
+                      {material.amount}
+                    </strong>
+                  </div>
+                )
+              )}
+            </div>
           </section>
-        </>
+
+          <section style={sectionStyle}>
+            <h3
+              style={{
+                margin: "0 0 16px",
+                fontSize: 16,
+              }}
+            >
+              🛠️ 建造步驟
+            </h3>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 18,
+              }}
+            >
+              {project.steps.map((step, index) => (
+                <div
+                  key={`${step.title}-${index}`}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "34px 1fr",
+                    gap: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 34,
+                      height: 34,
+                      display: "grid",
+                      placeItems: "center",
+                      borderRadius: 10,
+                      background: "#2b4431",
+                      color: "#b8dec0",
+                      fontWeight: 800,
+                      fontSize: 14,
+                    }}
+                  >
+                    {index + 1}
+                  </div>
+
+                  <div>
+                    <h4
+                      style={{
+                        margin: 0,
+                        fontSize: 15,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {step.title}
+                    </h4>
+
+                    <p
+                      style={{
+                        margin: "6px 0 0",
+                        lineHeight: 1.75,
+                        color: "#aeb7b0",
+                        fontSize: 14,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
       )}
     </aside>
   );
