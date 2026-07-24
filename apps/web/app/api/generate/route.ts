@@ -9,34 +9,126 @@ const sizeByScale: Record<string, string> = {
   Large: "寬 75 × 深 75 × 高 50 格",
 };
 
-const amountByScale: Record<
-  string,
-  {
-    main: string;
-    secondary: string;
-    detail: string;
-    lighting: string;
-  }
-> = {
-  Small: {
-    main: "約 8 組",
-    secondary: "約 4 組",
-    detail: "約 2 組",
-    lighting: "約 24 個",
-  },
-  Medium: {
-    main: "約 20 組",
-    secondary: "約 10 組",
-    detail: "約 5 組",
-    lighting: "約 48 個",
-  },
-  Large: {
-    main: "約 40 組",
-    secondary: "約 20 組",
-    detail: "約 10 組",
-    lighting: "約 96 個",
-  },
+type ArchitectMaterial = {
+  name: string;
+  amount: string;
 };
+
+type ArchitectStep = {
+  title: string;
+  description: string;
+};
+
+type ArchitectPlan = {
+  story: string;
+  palette: string;
+  materials: ArchitectMaterial[];
+  steps: ArchitectStep[];
+};
+
+function cleanJsonResponse(response: string): string {
+  let cleaned = response.trim();
+
+  cleaned = cleaned
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+
+  if (firstBrace === -1 || lastBrace === -1) {
+    throw new Error("Architect 沒有回傳有效的 JSON 物件。");
+  }
+
+  return cleaned.slice(firstBrace, lastBrace + 1);
+}
+
+function isArchitectPlan(value: unknown): value is ArchitectPlan {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    Array.isArray(value)
+  ) {
+    return false;
+  }
+
+  const plan = value as Record<string, unknown>;
+
+  if (
+    typeof plan.story !== "string" ||
+    typeof plan.palette !== "string" ||
+    !Array.isArray(plan.materials) ||
+    !Array.isArray(plan.steps)
+  ) {
+    return false;
+  }
+
+  const materialsAreValid = plan.materials.every(
+    (material) => {
+      if (
+        typeof material !== "object" ||
+        material === null ||
+        Array.isArray(material)
+      ) {
+        return false;
+      }
+
+      const item = material as Record<string, unknown>;
+
+      return (
+        typeof item.name === "string" &&
+        typeof item.amount === "string"
+      );
+    }
+  );
+
+  const stepsAreValid = plan.steps.every((step) => {
+    if (
+      typeof step !== "object" ||
+      step === null ||
+      Array.isArray(step)
+    ) {
+      return false;
+    }
+
+    const item = step as Record<string, unknown>;
+
+    return (
+      typeof item.title === "string" &&
+      typeof item.description === "string"
+    );
+  });
+
+  return (
+    materialsAreValid &&
+    stepsAreValid &&
+    plan.steps.length === 7
+  );
+}
+
+function parseArchitectPlan(response: string): ArchitectPlan {
+  const cleaned = cleanJsonResponse(response);
+
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    throw new Error(
+      "Architect 回傳的內容不是有效 JSON，請重新產生一次。"
+    );
+  }
+
+  if (!isArchitectPlan(parsed)) {
+    throw new Error(
+      "Architect 回傳格式不完整，必須包含 story、palette、materials 與 7 個 steps。"
+    );
+  }
+
+  return parsed;
+}
 
 export async function POST(request: Request) {
   try {
@@ -58,8 +150,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const scale = body.scale in sizeByScale ? body.scale : "Medium";
-    const amounts = amountByScale[scale];
+    const scale =
+      body.scale in sizeByScale ? body.scale : "Medium";
 
     const model = process.env.GEMINI_MODEL;
 
@@ -69,90 +161,30 @@ export async function POST(request: Request) {
 
     const architectResult = await runArchitect(
       {
-        theme: body.theme,
+        theme: body.theme.trim(),
         scale,
-        prompt: body.prompt,
+        prompt: body.prompt.trim(),
       },
       model
     );
 
+    const architectPlan =
+      parseArchitectPlan(architectResult);
+
     const plan: BuildingPlan = {
-      name: `${body.theme}建築計畫`,
-
-      // 這裡已經改成真正的 Architect AI 回答
-      story: architectResult,
-
+      name: `${body.theme.trim()}建築計畫`,
+      story: architectPlan.story,
       size: sizeByScale[scale],
-
-      palette:
-        "目前材料配色暫時沿用基礎規劃，之後會交由 Architect 與 Builder Agent 產生結構化結果。",
-
-      materials: [
-        {
-          name: "主要結構方塊",
-          amount: amounts.main,
-        },
-        {
-          name: "次要裝飾方塊",
-          amount: amounts.secondary,
-        },
-        {
-          name: "樓梯、半磚與牆",
-          amount: amounts.detail,
-        },
-        {
-          name: "燈籠、火把或其他光源",
-          amount: amounts.lighting,
-        },
-        {
-          name: "玻璃、欄杆與細節材料",
-          amount: "依 AI 設計調整",
-        },
-      ],
-
-      steps: [
-        {
-          title: "整理建築基地",
-          description:
-            "選擇適合的位置，清除地面障礙物，並依照建築尺寸標示四個角落。",
-        },
-        {
-          title: "建立地基與外框",
-          description:
-            "先完成主要地基，再根據 Architect 的設計標示入口、房間及外牆位置。",
-        },
-        {
-          title: "搭建立面與主要結構",
-          description:
-            "依照 Architect 產生的建築風格完成牆面、屋頂、塔樓及主要輪廓。",
-        },
-        {
-          title: "規劃內部空間",
-          description:
-            "加入大廳、走廊、樓梯與功能房間，確保玩家可以順暢移動。",
-        },
-        {
-          title: "加入主題裝飾",
-          description: `根據「${body.prompt}」及 Architect 的設計加入主題細節。`,
-        },
-        {
-          title: "完成照明與環境",
-          description:
-            "放置光源並補充道路、植栽、水景及周邊地形。",
-        },
-        {
-          title: "最後檢查",
-          description:
-            "檢查建築比例、玩家動線、照明及可能生成怪物的區域。",
-        },
-      ],
+      palette: architectPlan.palette,
+      materials: architectPlan.materials,
+      steps: architectPlan.steps,
     };
 
     return NextResponse.json({
       success: true,
       received: body,
       agents: {
-        architect: architectResult,
+        architect: architectPlan,
       },
       plan,
     });
